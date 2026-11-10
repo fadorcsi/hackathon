@@ -29,6 +29,12 @@ Open **http://localhost:8000/post**:
 
 The report page can also add any of its three posts to the same queue.
 
+### Watching topics
+
+The **Watching for new articles** card checks your topics every few hours (Google News in English and Hungarian, plus any RSS feeds you add). Claude sorts the new articles into worth posting or not, with a one-line reason, and drafts the best ones into your queue as **drafts**. The watcher never publishes on its own: you review each draft and click Schedule. Set your topics under *Topics & settings*. The ones there now are placeholders.
+
+Some Google News links hide the publisher's address. If a draft can't be made automatically, click **Open in editor**, or paste the text.
+
 ### Connecting LinkedIn (one time, about 10 minutes)
 
 Until you connect, the app runs in **test mode**: posts are written to `outbox.log`, nothing goes to LinkedIn.
@@ -60,6 +66,7 @@ Demo mode (`DEMO=1 python app.py`, or no key set) returns a canned result built 
 - `article.py`: fetch an article and draft one post from it
 - `linkedin.py`: LinkedIn login and publishing (test mode without login)
 - `post_queue.py`: SQLite queue and the scheduler
+- `watcher.py`: topic watcher (feeds → Claude ranking → drafts)
 - `app.py`: Flask server
 - `static/index.html`: the whole UI
 - `samples/voice_posts.json`: your three voice posts + style notes, pre-filled in the form

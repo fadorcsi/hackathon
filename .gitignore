@@ -5,3 +5,4 @@ __pycache__/
 posts.db
 linkedin_token.json
 outbox.log
+watch.json

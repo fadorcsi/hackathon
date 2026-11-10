@@ -66,6 +66,29 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
     <div class="card li" id="li"></div>
     <div class="card">
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+        <h2 style="margin:0">Watching for new articles</h2>
+        <button class="ghost" id="settingsBtn" type="button">Topics &amp; settings</button>
+      </div>
+      <div class="hint" id="lastRun" style="margin-top:4px"></div>
+      <div id="settings" hidden>
+        <label for="kw">Topics to watch (one per line, English or Hungarian)</label>
+        <textarea id="kw" style="min-height:110px"></textarea>
+        <label for="feeds">Extra news feeds (RSS links, optional, one per line)</label>
+        <textarea id="feeds" style="min-height:50px" placeholder="https://example.org/rss"></textarea>
+        <div class="row" style="flex-wrap:wrap;margin-top:10px">
+          <span class="hint">Check every</span><select id="every"><option>3</option><option>6</option><option>12</option><option>24</option></select><span class="hint">hours · draft up to</span>
+          <select id="maxd"><option>0</option><option>1</option><option>2</option><option>3</option><option>5</option></select><span class="hint">posts per check in</span>
+          <select id="wlang"><option value="en">English</option><option value="hu">Magyar</option><option value="report">article's language</option></select>
+        </div>
+        <label class="row" style="font-weight:400"><input type="checkbox" id="gnews"> Also search Google News for each topic</label>
+        <label class="row" style="font-weight:400"><input type="checkbox" id="enabled"> Watching is on</label>
+        <div class="btns"><button class="solid" id="saveWatch" type="button">Save topics</button></div>
+      </div>
+      <div class="btns"><button class="ghost" id="checkNow" type="button">Check now</button></div>
+      <div id="found" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
       <h2>Your queue</h2>
       <div id="queue" class="hint">Loading…</div>
     </div>
@@ -157,6 +180,7 @@ async function loadQueue() {
         <span>${["posted","posting"].includes(p.status) ? "" : `<button class="ghost" data-edit="${p.id}">Edit</button> <button class="ghost" data-del="${p.id}">Delete</button>`}</span>
       </div>
       <div class="t" style="color:var(--ink)">${esc(p.text)}</div>
+      ${p.note && p.status === "draft" ? `<div class="hint">ⓘ ${esc(p.note)}</div>` : ""}
       ${p.error ? `<div class="warn">${esc(p.error)}</div>` : ""}
     </div>`).join("");
   window._posts = Object.fromEntries(d.posts.map(p => [p.id, p]));
@@ -172,6 +196,61 @@ document.addEventListener("click", async e => {
   if (del && confirm("Delete this post from the queue?")) { await fetch(`/api/queue/${del}`, {method: "DELETE"}); if (editingId == del) editingId = null; loadQueue(); }
 });
 
+// ---------- watcher ----------
+$("#settingsBtn").onclick = () => $("#settings").hidden = !$("#settings").hidden;
+
+async function loadWatch(data) {
+  const d = data || await (await fetch("/api/watch")).json();
+  if (d.config) {
+    const c = d.config;
+    $("#kw").value = c.keywords.join("\n"); $("#feeds").value = c.feeds.join("\n");
+    $("#every").value = String(c.every_hours); $("#maxd").value = String(c.max_drafts_per_run);
+    $("#wlang").value = c.language; $("#gnews").checked = c.use_google_news; $("#enabled").checked = c.enabled;
+    $("#lastRun").textContent = `${c.enabled ? "On" : "Off"} · ${c.keywords.length} topics · every ${c.every_hours}h` +
+      (d.last_run ? ` · last check ${fmt(d.last_run.at)}: ${d.last_run.found} new, ${d.last_run.relevant} worth posting, ${d.last_run.drafted} drafted` : " · not checked yet");
+  }
+  if (!d.items) return;
+  $("#found").innerHTML = d.items.length ? d.items.map(it => `<div class="q">
+      <div><a href="${esc(it.url)}" target="_blank" rel="noopener" style="color:var(--ink);font-weight:600">${esc(it.title)}</a></div>
+      <div class="hint">${esc(it.source)} · “${esc(it.keyword)}”${it.score ? " · " + "★".repeat(it.score) : ""}</div>
+      ${it.reason ? `<div class="hint" style="margin-top:2px">${esc(it.reason)}</div>` : ""}
+      ${it.error ? `<div class="hint err">${esc(it.error)}</div>` : ""}
+      <div class="btns" style="margin-top:6px">
+        ${it.verdict === "drafted" ? `<span class="st posted">draft in queue</span>`
+          : `<button class="solid" data-wdraft="${esc(it.url)}">Draft post</button><button class="ghost" data-wuse="${esc(it.url)}">Open in editor</button><button class="ghost" data-wdis="${esc(it.url)}">Not interested</button>`}
+      </div></div>`).join("")
+    : `<div class="hint">No suggestions yet. Click "Check now" or set your topics.</div>`;
+}
+
+$("#saveWatch").onclick = async () => {
+  const body = {keywords: $("#kw").value.split("\n"), feeds: $("#feeds").value.split("\n"), every_hours: +$("#every").value,
+    max_drafts_per_run: +$("#maxd").value, language: $("#wlang").value, use_google_news: $("#gnews").checked, enabled: $("#enabled").checked};
+  const r = await fetch("/api/watch/config", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  if (r.ok) { $("#settings").hidden = true; loadWatch(); }
+};
+
+$("#checkNow").onclick = async e => {
+  const b = e.target; b.disabled = true; b.innerHTML = '<span class="spinner"></span>Checking the news…';
+  try {
+    const r = await fetch("/api/watch/run", {method: "POST"}); const d = await r.json();
+    b.textContent = r.ok ? (d.note && !d.found ? d.note : `Found ${d.found} new · ${d.relevant} worth posting · ${d.drafted} drafted`) : (d.error || "Check failed");
+  } finally { b.disabled = false; setTimeout(() => b.textContent = "Check now", 6000); loadWatch(); loadQueue(); }
+};
+
+document.addEventListener("click", async e => {
+  const t = e.target.dataset || {};
+  if (t.wuse) { $("#url").value = t.wuse; $("#f").requestSubmit(); }
+  if (t.wdis) loadWatch(await (await fetch("/api/watch/dismiss", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({url: t.wdis})})).json());
+  if (t.wdraft) {
+    e.target.disabled = true; e.target.innerHTML = '<span class="spinner"></span>Drafting…';
+    const r = await fetch("/api/watch/draft", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({url: t.wdraft})});
+    const d = await r.json();
+    if (!r.ok) { e.target.textContent = d.error; return; }
+    loadWatch(d); loadQueue();
+  }
+});
+
+loadWatch();
 loadQueue(); setInterval(loadQueue, 20000);
 </script>
 </body>

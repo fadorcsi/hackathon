@@ -34,6 +34,9 @@ def init():
             post_urn TEXT,
             test_mode INTEGER DEFAULT 0,
             error TEXT)""")
+        cols = {r[1] for r in c.execute("PRAGMA table_info(posts)")}
+        if "note" not in cols:
+            c.execute("ALTER TABLE posts ADD COLUMN note TEXT")
 
 
 def _now() -> str:
@@ -64,7 +67,7 @@ def get(pid: int) -> dict | None:
 
 
 def save(text: str, source_url: str = "", source_title: str = "", scheduled_at: str | None = None,
-         pid: int | None = None) -> dict:
+         pid: int | None = None, note: str | None = None) -> dict:
     if not text.strip():
         raise ValueError("The post is empty")
     if len(text) > 3000:
@@ -78,8 +81,8 @@ def save(text: str, source_url: str = "", source_title: str = "", scheduled_at: 
             c.execute("UPDATE posts SET text=?, source_url=?, source_title=?, status=?, scheduled_at=?, error=NULL WHERE id=?",
                       (text, source_url, source_title, status, when, pid))
         else:
-            pid = c.execute("INSERT INTO posts (created_at, text, source_url, source_title, status, scheduled_at) VALUES (?,?,?,?,?,?)",
-                            (_now(), text, source_url, source_title, status, when)).lastrowid
+            pid = c.execute("INSERT INTO posts (created_at, text, source_url, source_title, status, scheduled_at, note) VALUES (?,?,?,?,?,?,?)",
+                            (_now(), text, source_url, source_title, status, when, note)).lastrowid
     return get(pid)
 
 

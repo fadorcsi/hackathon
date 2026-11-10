@@ -14,9 +14,12 @@ import article
 import drafter
 import linkedin
 import post_queue
+import watcher
 
 app = Flask(__name__, static_folder="static")
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # API request limit for PDFs
+post_queue.init()
+watcher.init()
 
 
 @app.get("/")
@@ -134,6 +137,45 @@ def queue_delete(pid):
     return jsonify({"ok": True})
 
 
+# ---------- topic watcher ----------
+
+@app.get("/api/watch")
+def watch_get():
+    return jsonify({"config": watcher.load_config(), **watcher.suggestions()})
+
+
+@app.post("/api/watch/config")
+def watch_config():
+    try:
+        return jsonify(watcher.save_config(request.get_json(force=True)))
+    except (ValueError, TypeError) as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.post("/api/watch/run")
+def watch_run():
+    try:
+        return jsonify(watcher.run_once())
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.post("/api/watch/draft")
+def watch_draft():
+    url = request.get_json(force=True).get("url", "")
+    if not drafter.has_credentials():
+        return jsonify({"error": "Needs a Claude API key. Use the link box above instead."}), 400
+    ok = watcher.draft_from(url, watcher.load_config()["language"])
+    return jsonify({"ok": ok, **watcher.suggestions()})
+
+
+@app.post("/api/watch/dismiss")
+def watch_dismiss():
+    watcher.dismiss(request.get_json(force=True).get("url", ""))
+    return jsonify(watcher.suggestions())
+
+
 # ---------- LinkedIn login ----------
 
 @app.get("/auth/linkedin")
@@ -163,6 +205,7 @@ def li_disconnect():
 
 if __name__ == "__main__":
     post_queue.start_scheduler()
+    watcher.start()
     port = int(os.environ.get("PORT", 8000))
     print(f"Research to Posts on http://localhost:{port}  (demo mode: {_demo_mode()})")
     app.run(host="0.0.0.0", port=port, debug=False)
