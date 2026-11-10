@@ -87,70 +87,60 @@
   },
   "drafts": {
     "voice_profile": [
-      "Opens with a single blunt sentence, no greeting",
-      "Short paragraphs of 1-2 lines with white space between",
-      "Uses plain numbers, avoids jargon unless defined",
-      "Speaks from operator experience ('I've walked plants where...')",
-      "Ends with a direct question to practitioners",
-      "2-3 hashtags, no emojis"
+      "Opens with one short line that states the point or asks the question",
+      "Exact figures as • bullets, each tied to a named source",
+      "Frames water risk as economic risk; the cost of inaction is the through-line",
+      "One short punch line on its own line",
+      "Links back to AquaRE or personal experience in one line, never salesy",
+      "Ends with a forward-looking question, then the source and link",
+      "No hashtags, no emojis"
     ],
     "posts": [
       {
         "figure_id": "F1",
         "angle": "contrarian",
-        "hook": "We spend billions cleaning wastewater.\nThen we pour 97.6% of it away.",
-        "body": "The Water Reuse Outlook 2026 surveyed 14 countries.\n\nOnly 2.4% of treated municipal wastewater was reused in 2025.\n\nThat water has already been paid for. The pipes, the energy, the people running the plant. The hard part is done.\n\nAnd then it goes into the river.\n\nWe talk about water scarcity as if the answer is a new source. Often the source is already sitting at the outlet of our own treatment plants.\n\nReuse is not a futuristic idea. It's the cheapest litre we're not using.",
-        "closing_question": "If you run a plant: what would it take for your effluent to have a second customer?",
-        "hashtags": [
-          "WaterReuse",
-          "Wastewater",
-          "CircularWater"
-        ]
+        "hook": "We already pay for the water we don't use.",
+        "body": "The Water Reuse Outlook 2026 looked at 14 countries:\n• only 2.4% of treated municipal wastewater was reused in 2025;\n• at the same time, 61% of utilities reported at least one drought-related supply restriction in the past five years.\n\nMore than 97% of water that has already been collected, treated and paid for goes back to the river, while utilities ration supply.\n\nScarcity is not only a supply problem. It is an allocation problem.\n\nThis is close to how we think at AquaRE: before looking for a new source, look at the water balance you already have.",
+        "closing_question": "Which utility will be the first to treat its effluent as a product, not a by-product?",
+        "source_line": "Source: Water Reuse Outlook 2026, Example Water Institute",
+        "hashtags": []
       },
       {
         "figure_id": "F3",
         "angle": "practical",
-        "hook": "€0.38 vs €0.92.\nThat's the whole business case for water reuse in one line.",
-        "body": "From the Water Reuse Outlook 2026:\n\nThe median cost of producing water fit for irrigation reuse was €0.38 per cubic metre.\n\nSeawater desalination: €0.92 per cubic metre.\n\nSo if you're a region looking at a desal plant, three questions first:\n\n1. How much treated effluent do you already discharge within 20 km of farmland?\n2. What extra treatment step gets it to irrigation quality?\n3. Who owns the pipe in between?\n\nOften the answer is cheaper, faster and already half built.",
-        "closing_question": "Which of those three questions is the hardest one where you work?",
-        "hashtags": [
-          "WaterReuse",
-          "Desalination",
-          "Agriculture"
-        ]
+        "hook": "What does a cubic metre of new water actually cost?",
+        "body": "When a region runs short, the default answer is often desalination. The numbers suggest asking a different question first.\n\nAccording to the Water Reuse Outlook 2026:\n• the median cost of water fit for irrigation reuse was €0.38 per cubic metre;\n• seawater desalination came in at €0.92 per cubic metre;\n• plants with anaerobic digestion and CHP covered on average 47% of their own electricity demand.\n\nReuse is not the cheap option. It is the economic option.\n\nBefore the next large supply investment, the question should be: how much of the demand could the effluent we already treat cover?",
+        "closing_question": "",
+        "source_line": "Source: Water Reuse Outlook 2026, Example Water Institute",
+        "hashtags": []
       },
       {
         "figure_id": "F5",
         "angle": "story",
-        "hook": "I used to think the barrier to water reuse was technology.\nThe operators told me otherwise.",
-        "body": "In the Water Reuse Outlook 2026, 72% of utility managers named permitting and unclear quality rules as the biggest barrier to reuse.\n\nFinancing came second at 41%. Public acceptance, the one we spend the most time worrying about, was 23%.\n\nThe membranes work. The UV works. The engineers know how to do this.\n\nWhat's missing is a clear answer to a simple question: \"What quality do you need, and who signs off?\"\n\nUntil that's written down, every reuse project starts from zero.",
-        "closing_question": "What's the one rule you'd rewrite to unlock reuse in your country?",
-        "hashtags": [
-          "WaterPolicy",
-          "WaterReuse",
-          "Utilities"
-        ]
+        "hook": "Technology alone is not enough. The operators say so too.",
+        "body": "I often hear that water reuse is waiting for better technology. The utility managers in the Water Reuse Outlook 2026 see it differently:\n• 72% named permitting and unclear quality rules as the biggest barrier;\n• financing came second at 41%;\n• public acceptance, the one we worry about most, was 23%.\n\nThe treatment works. What is missing is a clear answer to who sets the quality standard and who signs off.\n\nRegulation is infrastructure too.\n\nAnd if we measure the cost of inaction, we should also ask: how much water have unclear rules already cost us?",
+        "closing_question": "Which rule would you rewrite first?",
+        "source_line": "Source: Water Reuse Outlook 2026, Example Water Institute",
+        "hashtags": []
       }
     ],
     "article": {
-      "title": "The cheapest new water source is already flowing out of our plants",
-      "subtitle": "Three numbers from the Water Reuse Outlook 2026 and what they mean for utilities",
+      "title": "The cheapest new water is already flowing out of our treatment plants",
+      "subtitle": "Three figures from the Water Reuse Outlook 2026, and why water risk is economic risk",
       "figure_ids": [
         "F1",
         "F3",
         "F6"
       ],
-      "body_markdown": "Every water conversation eventually lands on the same question: where will the next litre come from?\n\nNew reservoirs take decades. Desalination is energy hungry. Groundwater is already overdrawn in many basins. But one source is sitting in plain sight, already treated, already paid for, flowing out of every municipal wastewater plant.\n\n## We clean it, then we waste it\n\nThe Water Reuse Outlook 2026 surveyed 14 countries. Only 2.4% of treated municipal wastewater was reused in 2025.\n\nThink about what that means operationally. The collection network, the aeration, the sludge handling, the lab work: all of it is done. The water leaving the plant has a value. We just haven't given it a buyer.\n\n## It is not expensive\n\nThe usual objection is cost. The data says otherwise. The median cost of producing water fit for irrigation reuse was €0.38 per cubic metre, compared with €0.92 per cubic metre for seawater desalination.\n\nThat gap matters most in exactly the places under the most pressure: coastal regions with farming inland, where desal is often the default proposal.\n\n## The prize is large\n\nIf every country in the survey reached the reuse share already achieved by the leader, an additional 1.1 billion cubic metres of water per year would be available for agriculture and industry.\n\nThat's not a technology forecast. It's what happens if the rest catch up with someone who has already done it.\n\n## So what's stopping us?\n\nIn my conversations with operators the answer is rarely the treatment train. It's the paperwork: who defines the quality class, who is liable, who signs off. Fix that, and the cheapest new water source in Europe is ready to go.\n\nIf you work at a utility, a regulator or a farm cooperative, I'd love to hear what reuse looks like where you are."
+      "body_markdown": "Managing water scarcity begins long before water scarcity. It begins with knowing what water we already have, and what we do with it.\n\n## We treat it, then we let it go\n\nThe Water Reuse Outlook 2026 surveyed 14 countries. Only 2.4% of treated municipal wastewater was reused in 2025. The collection network, the treatment, the energy and the people running the plant have all been paid for. The water leaving the plant has value. It simply has no buyer yet.\n\nAt the same time, 61% of utilities reported at least one drought-related supply restriction in the past five years. Scarcity is already part of normal operations, not a future scenario.\n\n## The economic case\n\nThe usual objection to reuse is cost. The data points the other way. The median cost of producing water fit for irrigation reuse was €0.38 per cubic metre, compared with €0.92 per cubic metre for seawater desalination.\n\nThis matters most where the pressure is highest: regions with farming inland and a desalination plant on the table as the default answer.\n\n## The size of the opportunity\n\nIf every country in the survey reached the reuse share already achieved by the leading country, an additional 1.1 billion cubic metres of water per year would be available for agriculture and industry.\n\nThis is not a technology forecast. It is what happens if the others catch up with someone who has already done it.\n\n## Technology alone is not enough\n\nThe barrier is mostly regulation and organisation: who defines the quality class, who carries the risk, who signs off. That is where the work is, and where cooperation between utilities, regulators and water users decides the outcome.\n\nWater risk is economic risk. The question is not whether we can afford to reuse water, but how long we can afford not to.\n\nSource: Water Reuse Outlook 2026, Example Water Institute (sample report)."
     }
   },
   "unsupported": {
     "posts": [
       [
-        "97.6"
+        "97"
       ],
-      [
-        "20"
-      ],
+      [],
       []
     ],
     "article": []

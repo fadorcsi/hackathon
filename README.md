@@ -13,7 +13,7 @@
    - `✓ verified`: quote and number found on that page
    - `≈ partial`: number is in the report, wording differs
    - `✗ not found`: likely invented, so it isn't used for drafting
-3. **Draft in your voice.** Claude learns format and hooks from all three sample posts, and tone mainly from the ones you mark as **My post**. It writes 3 posts (contrarian, practical and story angles, a different figure each) plus a 400 to 600 word article.
+3. **Draft in your voice.** Claude learns format and hooks from all three sample posts, and tone mainly from the ones you mark as **My post**. You can choose English, Hungarian, or the same language as the report. It writes 3 posts (contrarian, practical and story angles, a different figure each) plus a 400 to 600 word article.
 4. **Catch extra numbers.** Any number in a draft that doesn't appear in the report (e.g. a calculated "97.6%") is flagged in red on that card.
 
 Each card shows a LinkedIn-style preview with the "…see more" fold, a character count, the source quote, and a Copy button.
@@ -33,7 +33,8 @@ Demo mode (`DEMO=1 python app.py`, or no key set) returns a canned result built 
 - `drafter.py`: pipeline (extract → verify → draft → check numbers), Claude API calls with structured outputs
 - `app.py`: Flask server
 - `static/index.html`: the whole UI
-- `samples/`: fictional sample report and demo output
+- `samples/voice_posts.json`: your three voice posts + style notes, pre-filled in the form
+- `samples/sample_report.md`, `samples/demo_output.json`: fictional sample report and demo output
 
 Uses `claude-opus-5-5` with adaptive thinking, structured outputs and server-side refusal fallbacks.
 

@@ -23,7 +23,7 @@ def index():
 
 @app.get("/api/status")
 def status():
-    return jsonify({"demo": _demo_mode()})
+    return jsonify({"demo": _demo_mode(), "voice": drafter.default_voice()})
 
 
 def _demo_mode() -> bool:
@@ -53,7 +53,8 @@ def draft():
         return jsonify({"error": "Paste at least one post you liked."}), 400
 
     try:
-        result = drafter.run(report, samples, request.form.get("style_notes", ""))
+        result = drafter.run(report, samples, request.form.get("style_notes", ""),
+                             request.form.get("language", "en"))
     except anthropic.AuthenticationError:
         return jsonify({"error": "Anthropic API key is missing or invalid."}), 401
     except anthropic.RateLimitError:

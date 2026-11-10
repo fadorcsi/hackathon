@@ -49,8 +49,9 @@ class Post(BaseModel):
         description="contrarian = challenges a belief; practical = what to do about it; story = human/industry narrative")
     hook: str = Field(description="The first 1-2 lines shown before '...see more'")
     body: str = Field(description="The rest of the post, LinkedIn formatting (short lines, blank lines between)")
-    closing_question: str = Field(description="One question to invite comments, or empty string if the voice samples never do this")
-    hashtags: list[str]
+    closing_question: str = Field(description="One question to invite comments, or empty string if it does not fit the voice")
+    source_line: str = Field(description="Source credit as the author writes it, e.g. 'Source: <report title>' or 'Forrás: ...'")
+    hashtags: list[str] = Field(description="Empty list if the sample posts use no hashtags")
 
 
 class Article(BaseModel):
@@ -140,26 +141,35 @@ def extract_figures(report: Report) -> FigureList:
         FigureList, EXTRACT_SYSTEM)
 
 
-DRAFT_SYSTEM = """You ghostwrite LinkedIn content for a professional who works in the water /
-environment sector. You will get verified figures from a report and sample posts.
+DRAFT_SYSTEM = """You ghostwrite LinkedIn content for a professional who works on water,
+climate and the economics of adaptation. You will get verified figures from a report
+and sample posts.
 
-Voice: some samples are the author's own posts and some are posts they admire.
-Learn FORMAT and hooks from all samples; learn TONE, vocabulary, sentence length,
-emoji and hashtag habits primarily from the posts marked as the author's own
-(if none are marked, blend all). Write in first person as the author.
+Voice: samples marked "mine" are the author's own posts; samples marked "admired" are
+posts by others they like. Learn FORMAT and hooks from all samples; learn TONE,
+vocabulary, sentence length, bullet style, emoji and hashtag habits primarily from the
+author's own posts (if none are marked, blend all). Follow the author style notes when
+given. Write in first person as the author. Match what the samples do, not generic
+LinkedIn habits: if they use no hashtags or emojis, use none.
 
 Rules:
 - Each of the 3 posts is built on exactly one figure, a different one each, and uses a
-  different angle (contrarian, practical, story).
-- Quote the figure exactly as given. Do not invent any other statistic, name, or claim
-  that is not in the figures list. Credit the source report naturally once.
-- Posts: 120-220 words, hook in the first line, short paragraphs, no "In today's world".
-- The article: 400-600 words, can combine 2-3 figures, written for LinkedIn Articles.
-- Never use the em dash character."""
+  different angle (contrarian, practical, story). Supporting figures from the list may
+  appear, but the anchor figure leads.
+- Quote every number exactly as given. Never calculate, round, invert or combine numbers
+  (no "97.6% is wasted" from "2.4% is reused"). Do not invent any statistic, name, place,
+  or claim that is not in the figures list. Credit the source report in source_line.
+- Posts: 100-220 words. The first line is the hook.
+- The article: 400-600 words, can combine 2-3 figures, written for LinkedIn Articles,
+  same voice, ## subheadings.
+- Write everything in the requested output language."""
+
+
+LANGUAGES = {"en": "English", "hu": "Hungarian (magyar)", "report": "the same language as the report"}
 
 
 def draft(figures: FigureList, sample_posts: list[dict], style_notes: str = "",
-          chosen_ids: list[str] | None = None) -> Drafts:
+          chosen_ids: list[str] | None = None, language: str = "en") -> Drafts:
     figs = [f for f in figures.figures if not chosen_ids or f.id in chosen_ids]
     samples = "\n\n".join(
         f"<sample whose=\"{s.get('whose', 'unspecified')}\">\n{s['text'].strip()}\n</sample>"
@@ -171,6 +181,8 @@ def draft(figures: FigureList, sample_posts: list[dict], style_notes: str = "",
     text = (f"<figures>\n{json.dumps(payload, ensure_ascii=False, indent=2)}\n</figures>\n\n"
             f"<samples>\n{samples}\n</samples>\n\n"
             + (f"<author_style_notes>\n{style_notes.strip()}\n</author_style_notes>\n\n" if style_notes.strip() else "")
+            + f"Output language: {LANGUAGES.get(language, LANGUAGES['en'])}. Translate figures' context "
+            "if needed but keep each number exactly as written in the figures list.\n\n"
             + "Write the 3 posts and the article.")
     return _call([{"type": "text", "text": text}], Drafts, DRAFT_SYSTEM)
 
@@ -234,26 +246,30 @@ def unsupported_numbers(report: Report, text: str) -> list[str]:
 
 def check_drafts(report: Report, drafts: Drafts) -> dict:
     return {
-        "posts": [unsupported_numbers(report, f"{p.hook}\n{p.body}\n{p.closing_question}") for p in drafts.posts],
+        "posts": [unsupported_numbers(report, f"{p.hook}\n{p.body}\n{p.closing_question}\n{p.source_line}") for p in drafts.posts],
         "article": unsupported_numbers(report, f"{drafts.article.title}\n{drafts.article.subtitle}\n{drafts.article.body_markdown}"),
     }
 
 
 # ---------- end to end ----------
 
-def run(report: Report, sample_posts: list[dict], style_notes: str = "") -> dict:
+def run(report: Report, sample_posts: list[dict], style_notes: str = "", language: str = "en") -> dict:
     figures = extract_figures(report)
     checks = verify_figures(report, figures)
     usable = [f.id for f in figures.figures if checks[f.id]["status"] in ("verified", "partial", "unchecked")]
     if len(usable) < 3:
         usable = [f.id for f in figures.figures]  # still draft, the UI shows the warnings
-    drafts = draft(figures, sample_posts, style_notes, usable)
+    drafts = draft(figures, sample_posts, style_notes, usable, language)
     return {"figures": figures.model_dump(), "checks": checks, "drafts": drafts.model_dump(),
             "unsupported": check_drafts(report, drafts)}
 
 
 def demo_result() -> dict:
     return json.loads((Path(__file__).parent / "samples" / "demo_output.json").read_text())
+
+
+def default_voice() -> dict:
+    return json.loads((Path(__file__).parent / "samples" / "voice_posts.json").read_text())
 
 
 def has_credentials() -> bool:
