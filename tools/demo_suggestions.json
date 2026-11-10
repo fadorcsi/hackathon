@@ -86,16 +86,5 @@
   "reason": "ILO: heat stress costs millions of jobs and billions of dollars, heat stress and productivity losses.",
   "verdict": "relevant",
   "error": null
- },
- {
-  "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPWkRWOVVhM3duUllQbklQdU5mYkV6WHdxQ29WQ1Fma1dmbDE1VkdEM09MdXQ2RG1Pa0pTclgyQ0tRX3F5cV9DZFlrR2tMdTJvYWRETFk2M3RZa1BNSjhLMWY1eVlaQXZ6alBNUHdsaHRtVTRvQngwMlNmMG1zeEotcWo5U0ppTzdEbVNKeURwa1dNUkhvYmswejR1MWdGUHBOOGc?oc=5",
-  "title": "Milliárdos kár, hackertámadás és aszály: csoda a nullszaldó az UBM-nél - TrendFM",
-  "source": "TrendFM",
-  "published": "2026-11-09T20:28:29+00:00",
-  "keyword": "aszálykár (számszerűsítés OR milliárd OR becslés)",
-  "score": 3,
-  "reason": "Egy cég mérlegében is megjelenik az aszály: vállalati szintű aszálykár, a tétlenség költsége kicsiben.",
-  "verdict": "relevant",
-  "error": null
  }
 ]

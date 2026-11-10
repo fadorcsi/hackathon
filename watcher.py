@@ -239,6 +239,10 @@ Worth posting: substantive news, research, data or policy with concrete figures 
 that connects to water risk as economic risk, drought, adaptation, water management or
 climate economics. Not worth it: press releases with no substance, duplicates of the same
 story, opinion without evidence, paywalled teasers, unrelated uses of the keyword.
+Only pick an article if it quantifies or substantially discusses the water, drought or climate
+impact itself (figures, costs, decisions, causes). An article that mentions drought only in
+passing, e.g. as one item in a list of a company's problems, without saying what it caused,
+is NOT worth posting: there is nothing for the author to analyse.
 Never pick a story the author has already posted about (see <already_posted>): the same
 event, report or data from another outlet counts as the same story, unless the new article
 adds substantial new figures or decisions; say so in the reason.
