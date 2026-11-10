@@ -41,7 +41,7 @@ def load_config() -> dict:
     cfg = dict(BASE)
     for f in (DEFAULT_FILE, CONFIG):
         if f.exists():
-            cfg |= json.loads(f.read_text())
+            cfg |= json.loads(f.read_text(encoding="utf-8"))
             if f == CONFIG:
                 break
     return cfg
@@ -57,7 +57,7 @@ def save_config(cfg: dict) -> dict:
     clean["feeds"] = [f for f in clean["feeds"] if f.startswith("http")]
     clean["every_hours"] = max(1, int(clean["every_hours"]))
     clean["max_drafts_per_run"] = max(0, min(10, int(clean["max_drafts_per_run"])))
-    CONFIG.write_text(json.dumps(clean, ensure_ascii=False, indent=2))
+    CONFIG.write_text(json.dumps(clean, ensure_ascii=False, indent=2), encoding="utf-8")
     return clean
 
 

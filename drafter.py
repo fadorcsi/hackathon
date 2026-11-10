@@ -265,11 +265,11 @@ def run(report: Report, sample_posts: list[dict], style_notes: str = "", languag
 
 
 def demo_result() -> dict:
-    return json.loads((Path(__file__).parent / "samples" / "demo_output.json").read_text())
+    return json.loads((Path(__file__).parent / "samples" / "demo_output.json").read_text(encoding="utf-8"))
 
 
 def default_voice() -> dict:
-    return json.loads((Path(__file__).parent / "samples" / "voice_posts.json").read_text())
+    return json.loads((Path(__file__).parent / "samples" / "voice_posts.json").read_text(encoding="utf-8"))
 
 
 def has_credentials() -> bool:

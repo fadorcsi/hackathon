@@ -46,7 +46,7 @@ def configured() -> bool:
 def _token() -> dict | None:
     if not TOKEN_FILE.exists():
         return None
-    t = json.loads(TOKEN_FILE.read_text())
+    t = json.loads(TOKEN_FILE.read_text(encoding="utf-8"))
     return t if t.get("expires_at", 0) > time.time() + 60 else None
 
 
@@ -92,7 +92,7 @@ def finish_login(code: str, state: str) -> dict:
     me = json.loads(ub)
     saved = {"access_token": tok["access_token"], "expires_at": time.time() + int(tok.get("expires_in", 0)),
              "person_urn": f"urn:li:person:{me['sub']}", "name": me.get("name", "")}
-    TOKEN_FILE.write_text(json.dumps(saved))
+    TOKEN_FILE.write_text(json.dumps(saved), encoding="utf-8")
     TOKEN_FILE.chmod(0o600)
     return saved
 
