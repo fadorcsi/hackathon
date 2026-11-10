@@ -67,6 +67,8 @@ Demo mode (`DEMO=1 python app.py`, or no key set) returns a canned result built 
 - `linkedin.py`: LinkedIn login and publishing (test mode without login)
 - `post_queue.py`: SQLite queue and the scheduler
 - `watcher.py`: topic watcher (feeds → Claude ranking → drafts)
+- `style.py`: your house style as hard checks (hashtags and emojis removed; anything off-style flagged while you edit)
+- `tools/build_demo.py`: builds the browser-only demo page
 - `app.py`: Flask server
 - `static/index.html`: the whole UI
 - `samples/voice_posts.json`: your three voice posts + style notes, pre-filled in the form

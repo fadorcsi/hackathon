@@ -20,6 +20,8 @@ from pathlib import Path
 from typing import Literal
 
 import anthropic
+
+import style
 from pydantic import BaseModel, Field
 
 MODEL = "claude-opus-5-5"
@@ -159,7 +161,10 @@ Rules:
 - Quote every number exactly as given. Never calculate, round, invert or combine numbers
   (no "97.6% is wasted" from "2.4% is reused"). Do not invent any statistic, name, place,
   or claim that is not in the figures list. Credit the source report in source_line.
-- Posts: 100-220 words. The first line is the hook.
+- Posts: 100-200 words, in the author's structure: a one-line hook; a line naming the source
+  ending with ':'; 2-4 • bullets with exact figures; one sentence on what this shows; a short
+  punch line on its own line; a forward-looking question. No hashtags, no emojis, no
+  exclamation marks unless the author's own samples use them.
 - The article: 400-600 words, can combine 2-3 figures, written for LinkedIn Articles,
   same voice, ## subheadings.
 - Write everything in the requested output language."""
@@ -260,8 +265,15 @@ def run(report: Report, sample_posts: list[dict], style_notes: str = "", languag
     if len(usable) < 3:
         usable = [f.id for f in figures.figures]  # still draft, the UI shows the warnings
     drafts = draft(figures, sample_posts, style_notes, usable, language)
+    style_issues = []
+    for post in drafts.posts:
+        post.hashtags = []
+        post.hook, f1 = style.enforce(post.hook)
+        post.body, f2 = style.enforce(post.body)
+        full = "\n\n".join(x for x in [post.hook, post.body, post.closing_question, post.source_line] if x)
+        style_issues.append(style.check(full) + f1 + f2)
     return {"figures": figures.model_dump(), "checks": checks, "drafts": drafts.model_dump(),
-            "unsupported": check_drafts(report, drafts)}
+            "unsupported": check_drafts(report, drafts), "style": style_issues}
 
 
 def demo_result() -> dict:

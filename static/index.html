@@ -97,7 +97,7 @@ $("#f").addEventListener("submit", async e => {
 const STATUS = {verified: "✓ verified in report", partial: "≈ number found, wording differs", unchecked: "? no text layer to check", not_found: "✗ not found in report"};
 
 function postText(p) {
-  return [p.hook, "", p.body, p.closing_question ? "\n" + p.closing_question : "", "", p.source_line || "", p.hashtags.map(h => "#" + h.replace(/^#/, "")).join(" ")].join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  return [p.hook, "", p.body, p.closing_question ? "\n" + p.closing_question : "", "", p.source_line || "", (p.hashtags || []).map(h => "#" + h.replace(/^#/, "")).join(" ")].join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 function render(d) {
@@ -127,7 +127,7 @@ function render(d) {
       <div class="text">${esc(p.body)}${p.closing_question ? "\n\n" + esc(p.closing_question) : ""}</div>
       ${p.source_line ? `<div class="hint" style="margin-top:8px">${esc(p.source_line)}</div>` : ""}
       <div class="tags">${p.hashtags.map(h => "#" + esc(h.replace(/^#/, ""))).join(" ")}</div>
-      ${proof(p.figure_id)}${warn(un.posts[i])}
+      ${proof(p.figure_id)}${warn(un.posts[i])}${(d.style && d.style[i] && d.style[i].length) ? `<div class="warn" style="border-color:var(--warn);color:var(--ink)"><b>Style check:</b> ${d.style[i].map(esc).join(" ")}</div>` : ""}
       <div class="foot"><span>${t.length} / 3000 characters</span><span><button class="ghost" data-queue="${i}">Add to queue</button> <button class="ghost" data-copy="post${i}">Copy post</button></span></div>
     </div>`;}).join("")}</div>`);
 

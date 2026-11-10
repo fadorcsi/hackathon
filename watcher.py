@@ -304,8 +304,12 @@ def draft_from(url: str, language: str = "en") -> bool:
         real = resolve_google_news(url)
         title, text = article.fetch_article(real)
         d = article.draft_post(title, text, real, drafter.default_voice(), language)
-        note = (f"Found by the watcher. Check these numbers, not found in the article: {', '.join(d['unsupported'])}"
-                if d["unsupported"] else "Found by the watcher. Review before scheduling.")
+        parts = ["Found by the watcher. Review before scheduling."]
+        if d["unsupported"]:
+            parts.append(f"Check these numbers, not found in the article: {', '.join(d['unsupported'])}.")
+        if d.get("style"):
+            parts.append("Style: " + " ".join(d["style"]))
+        note = " ".join(parts)
         p = post_queue.save(d["text"], real, d["source_title"], note=note)
         with _conn() as c:
             c.execute("UPDATE found SET verdict='drafted', post_id=?, error=NULL WHERE url=?", (p["id"], url))

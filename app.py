@@ -14,6 +14,7 @@ import article
 import drafter
 import linkedin
 import post_queue
+import style
 import watcher
 
 app = Flask(__name__, static_folder="static")
@@ -109,6 +110,12 @@ def article_draft():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": f"Couldn't open that link ({e}). Paste the article text instead."}), 400
+
+
+@app.post("/api/style")
+def style_check():
+    d = request.get_json(force=True)
+    return jsonify({"issues": style.check(d.get("text", ""), d.get("url", ""))})
 
 
 # ---------- queue ----------

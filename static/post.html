@@ -20,6 +20,9 @@ input[type=url],input[type=datetime-local]{width:100%;font:inherit;color:var(--i
 .q .t{white-space:pre-wrap;font-size:13px;max-height:4.5em;overflow:hidden;margin:6px 0}
 .st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid currentColor}
 .st.scheduled{color:var(--accent)} .st.draft{color:var(--muted)} .st.posted{color:var(--ok)} .st.failed{color:var(--bad)} .st.posting{color:var(--warn)}
+.stylechk{margin-top:8px;border:1px solid var(--warn);color:var(--ink);border-radius:8px;padding:6px 10px;font-size:12px}
+.stylechk ul{margin:4px 0 0;padding-left:18px}
+.stylechk.ok{border-color:var(--ok);color:var(--ok)}
 details summary{cursor:pointer;color:var(--muted);font-size:13px}
 </style>
 </head>
@@ -50,6 +53,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div class="hint" id="src"></div>
       <textarea id="text"></textarea>
       <div id="warn"></div>
+      <div id="styleBox"></div>
       <div class="foot"><span id="count"></span><span class="hint">Nothing is posted until you click a button below.</span></div>
 
       <h2 style="margin-top:16px"><span class="step">3</span>When should it go out?</h2>
@@ -112,6 +116,23 @@ function defaultWhen() {               // tomorrow 08:30 local, a good LinkedIn 
   const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(8, 30, 0, 0);
   return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 }
+let styleTimer = null;
+function showStyle(issues) {
+  $("#styleBox").innerHTML = issues && issues.length
+    ? `<div class="stylechk"><b>Style check</b><ul>${issues.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`
+    : `<div class="stylechk ok">✓ Matches your style</div>`;
+}
+function liveStyle() {
+  clearTimeout(styleTimer);
+  styleTimer = setTimeout(async () => {
+    try {
+      const r = await fetch("/api/style", {method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({text: $("#text").value, url: current?.source_url || ""})});
+      showStyle((await r.json()).issues);
+    } catch {}
+  }, 500);
+}
+$("#text").addEventListener("input", liveStyle);
 function updateCount() { const n = $("#text").value.length; $("#count").textContent = `${n} / 3000 characters`; $("#count").style.color = n > 3000 ? "var(--bad)" : ""; }
 $("#text").addEventListener("input", updateCount);
 
@@ -130,6 +151,7 @@ $("#f").addEventListener("submit", async e => {
     if (!r.ok) throw new Error(d.error);
     current = d; editingId = null;
     openReview(d.text, d.source_title, d.source_url, d.unsupported);
+    showStyle(d.style);
   } catch (err) {
     $("#review").hidden = false; $("#text").value = ""; $("#msg").innerHTML = `<span class="err">${esc(err.message)}</span>`;
   } finally { btn.disabled = false; btn.textContent = "Draft the post"; }
@@ -197,7 +219,7 @@ document.addEventListener("click", async e => {
   const ed = e.target.dataset?.edit, del = e.target.dataset?.del;
   if (ed) {
     const p = window._posts[ed]; editingId = p.id; current = {source_url: p.source_url, source_title: p.source_title};
-    openReview(p.text, p.source_title, p.source_url, []);
+    openReview(p.text, p.source_title, p.source_url, []); liveStyle();
     if (p.scheduled_at) $("#when").value = new Date(new Date(p.scheduled_at) - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
   if (del && confirm("Delete this post from the queue?")) { await fetch(`/api/queue/${del}`, {method: "DELETE"}); if (editingId == del) editingId = null; loadQueue(); }
