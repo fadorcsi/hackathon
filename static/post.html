@@ -72,14 +72,21 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       </div>
       <div class="hint" id="lastRun" style="margin-top:4px"></div>
       <div id="settings" hidden>
-        <label for="kw">Topics to watch (one per line, English or Hungarian)</label>
-        <textarea id="kw" style="min-height:110px"></textarea>
-        <label for="feeds">Extra news feeds (RSS links, optional, one per line)</label>
-        <textarea id="feeds" style="min-height:50px" placeholder="https://example.org/rss"></textarea>
+        <label for="kwEn">English topics (one per line, searched on Google News UK)</label>
+        <textarea id="kwEn" style="min-height:110px"></textarea>
+        <label for="kwHu">Hungarian topics (one per line, searched on Google News HU)</label>
+        <textarea id="kwHu" style="min-height:110px"></textarea>
+        <div class="hint">Tip: <code>bejelentés (aszály OR víz)</code> keeps a broad word on topic. <code>"cost of inaction"</code> in quotes means the exact phrase.</div>
+        <label for="trusted">Trusted sources (Claude ranks these higher)</label>
+        <textarea id="trusted" style="min-height:50px"></textarea>
+        <label for="feeds">News site feeds (RSS links, one per line)</label>
+        <textarea id="feeds" style="min-height:60px" placeholder="https://example.org/rss"></textarea>
+        <label for="terms">From those sites, keep articles containing (word beginnings, one per line)</label>
+        <textarea id="terms" style="min-height:80px"></textarea>
         <div class="row" style="flex-wrap:wrap;margin-top:10px">
           <span class="hint">Check every</span><select id="every"><option>3</option><option>6</option><option>12</option><option>24</option></select><span class="hint">hours · draft up to</span>
           <select id="maxd"><option>0</option><option>1</option><option>2</option><option>3</option><option>5</option></select><span class="hint">posts per check in</span>
-          <select id="wlang"><option value="en">English</option><option value="hu">Magyar</option><option value="report">article's language</option></select>
+          <select id="wlang"><option value="report">the article's language</option><option value="en">English</option><option value="hu">Magyar</option></select>
         </div>
         <label class="row" style="font-weight:400"><input type="checkbox" id="gnews"> Also search Google News for each topic</label>
         <label class="row" style="font-weight:400"><input type="checkbox" id="enabled"> Watching is on</label>
@@ -203,10 +210,11 @@ async function loadWatch(data) {
   const d = data || await (await fetch("/api/watch")).json();
   if (d.config) {
     const c = d.config;
-    $("#kw").value = c.keywords.join("\n"); $("#feeds").value = c.feeds.join("\n");
+    const L = (id, arr) => $(id).value = (arr || []).join("\n");
+    L("#kwEn", c.keywords_en); L("#kwHu", c.keywords_hu); L("#trusted", c.trusted_sources); L("#feeds", c.feeds); L("#terms", c.feed_terms);
     $("#every").value = String(c.every_hours); $("#maxd").value = String(c.max_drafts_per_run);
     $("#wlang").value = c.language; $("#gnews").checked = c.use_google_news; $("#enabled").checked = c.enabled;
-    $("#lastRun").textContent = `${c.enabled ? "On" : "Off"} · ${c.keywords.length} topics · every ${c.every_hours}h` +
+    $("#lastRun").textContent = `${c.enabled ? "On" : "Off"} · ${c.keywords_en.length + c.keywords_hu.length} topics · ${c.feeds.length} news sites · every ${c.every_hours}h` +
       (d.last_run ? ` · last check ${fmt(d.last_run.at)}: ${d.last_run.found} new, ${d.last_run.relevant} worth posting, ${d.last_run.drafted} drafted` : " · not checked yet");
   }
   if (!d.items) return;
@@ -223,7 +231,8 @@ async function loadWatch(data) {
 }
 
 $("#saveWatch").onclick = async () => {
-  const body = {keywords: $("#kw").value.split("\n"), feeds: $("#feeds").value.split("\n"), every_hours: +$("#every").value,
+  const S = id => $(id).value.split("\n");
+  const body = {keywords_en: S("#kwEn"), keywords_hu: S("#kwHu"), trusted_sources: S("#trusted"), feeds: S("#feeds"), feed_terms: S("#terms"), every_hours: +$("#every").value,
     max_drafts_per_run: +$("#maxd").value, language: $("#wlang").value, use_google_news: $("#gnews").checked, enabled: $("#enabled").checked};
   const r = await fetch("/api/watch/config", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
   if (r.ok) { $("#settings").hidden = true; loadWatch(); }

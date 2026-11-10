@@ -31,7 +31,7 @@ The report page can also add any of its three posts to the same queue.
 
 ### Watching topics
 
-The **Watching for new articles** card checks your topics every few hours (Google News in English and Hungarian, plus any RSS feeds you add). Claude sorts the new articles into worth posting or not, with a one-line reason, and drafts the best ones into your queue as **drafts**. The watcher never publishes on its own: you review each draft and click Schedule. Set your topics under *Topics & settings*. The ones there now are placeholders.
+The **Watching for new articles** card checks your topics every few hours (Google News in English and Hungarian, plus any RSS feeds you add). Claude sorts the new articles into worth posting or not, with a one-line reason, and drafts the best ones into your queue as **drafts**. The watcher never publishes on its own: you review each draft and click Schedule. Your topics live in `samples/watch_config.json` (English and Hungarian Google News searches, trusted sources, and Telex/444/Átlátszó feeds filtered by topic words). Edit them under *Topics & settings*. Changes are saved to `watch.json`.
 
 Some Google News links hide the publisher's address. If a draft can't be made automatically, click **Open in editor**, or paste the text.
 
