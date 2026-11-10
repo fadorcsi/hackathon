@@ -20,7 +20,7 @@ Each card shows a LinkedIn-style preview with the "…see more" fold, a characte
 
 ## Article → post (with scheduling)
 
-Open **http://localhost:8000/post**:
+Open **http://localhost:8000**:
 
 1. Paste a link to an article (or paste its text if it is paywalled).
 2. Claude writes a post in your voice: hook, 3 to 4 • bullets with the key messages, a punch line, a question, then the source and link. Numbers not in the article are flagged.

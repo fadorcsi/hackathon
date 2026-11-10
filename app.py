@@ -24,6 +24,11 @@ watcher.init()
 
 @app.get("/")
 def index():
+    return send_from_directory("static", "post.html")
+
+
+@app.get("/report")
+def report_page():
     return send_from_directory("static", "index.html")
 
 
@@ -79,7 +84,7 @@ def draft():
 
 @app.get("/post")
 def post_page():
-    return send_from_directory("static", "post.html")
+    return redirect("/")
 
 
 @app.post("/api/article")
@@ -194,7 +199,7 @@ def li_callback():
         linkedin.finish_login(request.args["code"], request.args.get("state", ""))
     except Exception as e:
         return f"LinkedIn login failed: {e}", 400
-    return redirect("/post")
+    return redirect("/")
 
 
 @app.post("/api/linkedin/disconnect")
