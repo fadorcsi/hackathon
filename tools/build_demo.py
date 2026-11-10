@@ -33,18 +33,8 @@ seed = [{"id": 1, "created_at": now.isoformat(), "text": demo["text"], "source_u
          "source_title": demo["source_title"], "status": "scheduled",
          "scheduled_at": (now + dt.timedelta(days=1)).replace(hour=7, minute=30, second=0, microsecond=0).isoformat(),
          "posted_at": None, "post_urn": None, "test_mode": 0, "error": None, "note": "Example scheduled post."}]
-items = [
-    {"url": "https://telex.hu/gazdasag/2026/09/25/mnb-inflacios-jelentes-mezogazdasag-termes-aszaly-szarazsag",
-     "title": "Durván lehúzza az aszály a magyar gazdaságot idén, az MNB már ki is számolta, mekkora lehet a mínusz",
-     "source": "Telex", "keyword": "MNB (klímakockázat OR aszály OR zöld)", "score": 5,
-     "reason": "Example suggestion: MNB quantifies drought damage to GDP, the cost of inaction in hard numbers.",
-     "verdict": "relevant", "error": None},
-    {"url": "https://rekk.hu/elemzes/368/az-aszalyok-es-a-vizhiany-karos-hatasainak-enyhitese-az-egyre-gyakoribb-klima-szelsosegek-kozepette",
-     "title": "Az aszályok és a vízhiány káros hatásainak enyhítése az egyre gyakoribb klíma-szélsőségek közepette",
-     "source": "REKK", "keyword": "REKK (víz OR aszály OR klíma)", "score": 4,
-     "reason": "Example suggestion: trusted source, practical guide on water retention and demand.",
-     "verdict": "relevant", "error": None},
-]
+# real suggestions from a live watcher run (last 3 days, already-posted stories removed)
+items = json.loads((ROOT / "tools/demo_suggestions.json").read_text(encoding="utf-8"))
 fields = {k: v.description for k, v in article.ArticlePost.model_fields.items()}
 data = {"article_system": article.ARTICLE_SYSTEM, "fields": fields, "languages": drafter.LANGUAGES, "seed": seed, "cfg": watcher.load_config(), "items": items, "voice": drafter.default_voice(), "draft": demo}
 

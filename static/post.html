@@ -228,6 +228,10 @@ document.addEventListener("click", async e => {
 // ---------- watcher ----------
 $("#settingsBtn").onclick = () => $("#settings").hidden = !$("#settings").hidden;
 
+function ago(iso) {
+  const h = Math.round((Date.now() - new Date(iso)) / 3600000);
+  return h < 1 ? "just now" : h < 24 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+}
 async function loadWatch(data) {
   const d = data || await (await fetch("/api/watch")).json();
   if (d.config) {
@@ -236,13 +240,13 @@ async function loadWatch(data) {
     L("#kwEn", c.keywords_en); L("#kwHu", c.keywords_hu); L("#trusted", c.trusted_sources); L("#feeds", c.feeds); L("#terms", c.feed_terms);
     $("#every").value = String(c.every_hours); $("#maxd").value = String(c.max_drafts_per_run);
     $("#wlang").value = c.language; $("#gnews").checked = c.use_google_news; $("#enabled").checked = c.enabled;
-    $("#lastRun").textContent = `${c.enabled ? "On" : "Off"} · ${c.keywords_en.length + c.keywords_hu.length} topics · ${c.feeds.length} news sites · every ${c.every_hours}h` +
+    $("#lastRun").textContent = `${c.enabled ? "On" : "Off"} · ${c.keywords_en.length + c.keywords_hu.length} topics · ${c.feeds.length} news sites · every ${c.every_hours}h · news from the last ${c.max_age_days || 3} days` +
       (d.last_run ? ` · last check ${fmt(d.last_run.at)}: ${d.last_run.found} new, ${d.last_run.relevant} worth posting, ${d.last_run.drafted} drafted` : " · not checked yet");
   }
   if (!d.items) return;
   $("#found").innerHTML = d.items.length ? d.items.map(it => `<div class="q">
       <div><a href="${esc(it.url)}" target="_blank" rel="noopener" style="color:var(--ink);font-weight:600">${esc(it.title)}</a></div>
-      <div class="hint">${esc(it.source)} · “${esc(it.keyword)}”${it.score ? " · " + "★".repeat(it.score) : ""}</div>
+      <div class="hint">${esc(it.source)}${it.published ? " · " + ago(it.published) : ""} · “${esc(it.keyword)}”${it.score ? " · " + "★".repeat(it.score) : ""}</div>
       ${it.reason ? `<div class="hint" style="margin-top:2px">${esc(it.reason)}</div>` : ""}
       ${it.error ? `<div class="hint err">${esc(it.error)}</div>` : ""}
       <div class="btns" style="margin-top:6px">

@@ -48,11 +48,11 @@
     "Civaqua",
     "vízvisszatartási program",
     "Fenntartható Vízgazdálkodási Intézkedési Terv",
-    "KAP reform",
+    "\"KAP-reform\" OR \"közös agrárpolitika\"",
     "mezőgazdasági aszálykárok",
     "erdészeti karbonfinanszírozás",
     "magyar klímakockázatok",
-    "Paksi Atomerőmű (Duna OR vízhőmérséklet OR aszály)",
+    "\"Paksi Atomerőmű\" (Duna OR vízhőmérséklet OR aszály)",
     "természetfüggőség pénzügyi rendszer",
     "MNB (klímakockázat OR aszály OR zöld)",
     "REKK (víz OR aszály OR klíma)",
@@ -114,5 +114,6 @@
   "every_hours": 12,
   "max_drafts_per_run": 2,
   "language": "report",
-  "enabled": true
+  "enabled": true,
+  "max_age_days": 3
 }
