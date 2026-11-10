@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Article to Post</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+main{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+input[type=url],input[type=datetime-local]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px}
+#text{min-height:340px;font-size:14px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btns button{flex:1 1 auto}
+.solid{background:var(--accent);color:var(--accent-ink)}
+.step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:12px;margin-right:6px}
+.li{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.q{border-top:1px solid var(--line);padding:12px 0}
+.q:first-child{border-top:0}
+.q .t{white-space:pre-wrap;font-size:13px;max-height:4.5em;overflow:hidden;margin:6px 0}
+.st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid currentColor}
+.st.scheduled{color:var(--accent)} .st.draft{color:var(--muted)} .st.posted{color:var(--ok)} .st.failed{color:var(--bad)} .st.posting{color:var(--warn)}
+details summary{cursor:pointer;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<nav><a class="on" href="/post">Article → post</a><a href="/">Report → 3 posts</a></nav>
+<header>
+  <h1>Article → LinkedIn post</h1>
+  <p>Paste a link to an article you liked. You get a post in your voice with the key messages as bullets and the link. Review it, then schedule it or post it.</p>
+</header>
+<main>
+  <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+    <form id="f" class="card">
+      <h2><span class="step">1</span>Article link</h2>
+      <input type="url" id="url" placeholder="https://…" required>
+      <details style="margin-top:8px"><summary>Paywalled or won't load? Paste the text instead</summary>
+        <textarea id="pasted" placeholder="Paste the article text" style="margin-top:6px"></textarea>
+      </details>
+      <div class="row" style="margin-top:10px">
+        <label for="language" style="margin:0">Write in</label>
+        <select id="language"><option value="en">English</option><option value="hu">Magyar</option><option value="report">Same as the article</option></select>
+      </div>
+      <button class="primary" id="go" type="submit">Draft the post</button>
+      <div id="mode" class="hint" style="margin-top:8px"></div>
+    </form>
+
+    <div class="card" id="review" hidden>
+      <h2><span class="step">2</span>Review and edit</h2>
+      <div class="hint" id="src"></div>
+      <textarea id="text"></textarea>
+      <div id="warn"></div>
+      <div class="foot"><span id="count"></span><span class="hint">Nothing is posted until you click a button below.</span></div>
+
+      <h2 style="margin-top:16px"><span class="step">3</span>When should it go out?</h2>
+      <input type="datetime-local" id="when">
+      <div class="btns">
+        <button class="ghost" id="saveDraft" type="button">Save as draft</button>
+        <button class="solid" id="schedule" type="button">Schedule</button>
+        <button class="ghost" id="postNow" type="button">Post now</button>
+      </div>
+      <div id="msg" class="hint" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+    <div class="card li" id="li"></div>
+    <div class="card">
+      <h2>Your queue</h2>
+      <div id="queue" class="hint">Loading…</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let current = null, editingId = null;
+
+const fmt = iso => iso ? new Date(iso).toLocaleString([], {dateStyle: "medium", timeStyle: "short"}) : "";
+function defaultWhen() {               // tomorrow 08:30 local, a good LinkedIn slot
+  const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(8, 30, 0, 0);
+  return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+function updateCount() { const n = $("#text").value.length; $("#count").textContent = `${n} / 3000 characters`; $("#count").style.color = n > 3000 ? "var(--bad)" : ""; }
+$("#text").addEventListener("input", updateCount);
+
+fetch("/api/status").then(r => r.json()).then(s => {
+  if (s.demo) $("#mode").textContent = "Demo mode: no Claude API key set, so you'll get a sample draft.";
+});
+
+$("#f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const btn = $("#go"); btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Reading the article…';
+  try {
+    const r = await fetch("/api/article", {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({url: $("#url").value, text: $("#pasted").value, language: $("#language").value})});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    current = d; editingId = null;
+    openReview(d.text, d.source_title, d.source_url, d.unsupported);
+  } catch (err) {
+    $("#review").hidden = false; $("#text").value = ""; $("#msg").innerHTML = `<span class="err">${esc(err.message)}</span>`;
+  } finally { btn.disabled = false; btn.textContent = "Draft the post"; }
+});
+
+function openReview(text, title, url, unsupported) {
+  $("#review").hidden = false;
+  $("#text").value = text; updateCount();
+  $("#src").innerHTML = title ? `From: <b>${esc(title)}</b>` : "";
+  $("#warn").innerHTML = unsupported && unsupported.length
+    ? `<div class="warn">⚠ Not in the article: <b>${unsupported.map(esc).join(", ")}</b>. Check or remove before posting.</div>` : "";
+  if (!$("#when").value) $("#when").value = defaultWhen();
+  $("#msg").textContent = "";
+  current = Object.assign(current || {}, {source_title: title, source_url: url});
+  $("#review").scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+async function save(mode) {
+  const body = {id: editingId, text: $("#text").value, source_url: current?.source_url || "", source_title: current?.source_title || ""};
+  if (mode === "schedule") {
+    if (!$("#when").value) { $("#msg").textContent = "Pick a date and time first."; return; }
+    body.scheduled_at = new Date($("#when").value).toISOString();
+  }
+  if (mode === "now") {
+    if (!confirm("Publish this post to LinkedIn now?")) return;
+    body.post_now = true;
+  }
+  const r = await fetch("/api/queue", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  const d = await r.json();
+  if (!r.ok) { $("#msg").innerHTML = `<span class="err">${esc(d.error)}</span>`; return; }
+  editingId = d.id;
+  $("#msg").innerHTML = d.status === "scheduled" ? `Scheduled for <b>${fmt(d.scheduled_at)}</b>. Keep the app running so it can post.`
+    : d.status === "posted" ? (d.test_mode ? "Test mode: written to outbox.log, not posted to LinkedIn." : "Posted to LinkedIn ✓")
+    : d.status === "failed" ? `<span class="err">${esc(d.error)}</span>` : "Saved as draft.";
+  if (d.status === "posted") editingId = null;
+  loadQueue();
+}
+$("#saveDraft").onclick = () => save("draft");
+$("#schedule").onclick = () => save("schedule");
+$("#postNow").onclick = () => save("now");
+
+async function loadQueue() {
+  const r = await fetch("/api/queue"); const d = await r.json();
+  const li = d.linkedin;
+  $("#li").innerHTML = li.connected
+    ? `<div><b>LinkedIn connected</b><div class="hint">${esc(li.name)} · login valid until ${fmt(li.expires_at * 1000)}</div></div><button class="ghost" id="disc">Disconnect</button>`
+    : `<div><b>LinkedIn not connected: test mode</b><div class="hint">Scheduled posts are written to outbox.log instead of LinkedIn.</div></div><a class="ghost" style="text-decoration:none;border-radius:999px" href="/auth/linkedin"><button class="solid" type="button">Connect LinkedIn</button></a>`;
+  const dis = $("#disc"); if (dis) dis.onclick = async () => { await fetch("/api/linkedin/disconnect", {method: "POST"}); loadQueue(); };
+
+  if (!d.posts.length) { $("#queue").innerHTML = "Nothing saved yet."; return; }
+  $("#queue").innerHTML = d.posts.map(p => `<div class="q">
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+        <span><span class="st ${p.status}">${p.status === "posted" && p.test_mode ? "posted (test)" : p.status}</span>
+        <span class="hint">${p.status === "scheduled" ? "goes out " + fmt(p.scheduled_at) : p.status === "posted" ? fmt(p.posted_at) : "saved " + fmt(p.created_at)}</span></span>
+        <span>${["posted","posting"].includes(p.status) ? "" : `<button class="ghost" data-edit="${p.id}">Edit</button> <button class="ghost" data-del="${p.id}">Delete</button>`}</span>
+      </div>
+      <div class="t" style="color:var(--ink)">${esc(p.text)}</div>
+      ${p.error ? `<div class="warn">${esc(p.error)}</div>` : ""}
+    </div>`).join("");
+  window._posts = Object.fromEntries(d.posts.map(p => [p.id, p]));
+}
+
+document.addEventListener("click", async e => {
+  const ed = e.target.dataset?.edit, del = e.target.dataset?.del;
+  if (ed) {
+    const p = window._posts[ed]; editingId = p.id; current = {source_url: p.source_url, source_title: p.source_title};
+    openReview(p.text, p.source_title, p.source_url, []);
+    if (p.scheduled_at) $("#when").value = new Date(new Date(p.scheduled_at) - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  }
+  if (del && confirm("Delete this post from the queue?")) { await fetch(`/api/queue/${del}`, {method: "DELETE"}); if (editingId == del) editingId = null; loadQueue(); }
+});
+
+loadQueue(); setInterval(loadQueue, 20000);
+</script>
+</body>
+</html>

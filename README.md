@@ -18,6 +18,32 @@
 
 Each card shows a LinkedIn-style preview with the "…see more" fold, a character count, the source quote, and a Copy button.
 
+## Article → post (with scheduling)
+
+Open **http://localhost:8000/post**:
+
+1. Paste a link to an article (or paste its text if it is paywalled).
+2. Claude writes a post in your voice: hook, 3 to 4 • bullets with the key messages, a punch line, a question, then the source and link. Numbers not in the article are flagged.
+3. Edit it, then **Save as draft**, **Schedule** (pick a date and time) or **Post now**.
+4. A scheduler inside the app publishes posts when they are due. Keep the app running.
+
+The report page can also add any of its three posts to the same queue.
+
+### Connecting LinkedIn (one time, about 10 minutes)
+
+Until you connect, the app runs in **test mode**: posts are written to `outbox.log`, nothing goes to LinkedIn.
+
+1. Go to https://www.linkedin.com/developers/apps and create an app (link it to the AquaRE company page).
+2. **Products** tab: add *Share on LinkedIn* and *Sign In with LinkedIn using OpenID Connect*.
+3. **Auth** tab: add the redirect URL `http://localhost:8000/auth/linkedin/callback`.
+4. Start the app with the app's keys:
+   ```bash
+   LINKEDIN_CLIENT_ID=... LINKEDIN_CLIENT_SECRET=... ANTHROPIC_API_KEY=... python app.py
+   ```
+5. Click **Connect LinkedIn** and log in. The login lasts about 60 days, then click Connect again.
+
+Posts go out as you, to your personal profile, through LinkedIn's official API.
+
 ## Run it
 
 ```bash
@@ -31,6 +57,9 @@ Demo mode (`DEMO=1 python app.py`, or no key set) returns a canned result built 
 ## Files
 
 - `drafter.py`: pipeline (extract → verify → draft → check numbers), Claude API calls with structured outputs
+- `article.py`: fetch an article and draft one post from it
+- `linkedin.py`: LinkedIn login and publishing (test mode without login)
+- `post_queue.py`: SQLite queue and the scheduler
 - `app.py`: Flask server
 - `static/index.html`: the whole UI
 - `samples/voice_posts.json`: your three voice posts + style notes, pre-filled in the form
@@ -38,6 +67,3 @@ Demo mode (`DEMO=1 python app.py`, or no key set) returns a canned result built 
 
 Uses `claude-opus-5-5` with adaptive thinking, structured outputs and server-side refusal fallbacks.
 
-## Not included (yet)
-
-Posting to LinkedIn. Drafts are copy-and-paste. A scheduler connector such as Typefully or Taplio could push them as LinkedIn drafts later.
