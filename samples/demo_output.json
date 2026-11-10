@@ -1,0 +1,158 @@
+{
+  "figures": {
+    "report_title": "Water Reuse Outlook 2026 (sample)",
+    "report_publisher": "Example Water Institute (fictional)",
+    "figures": [
+      {
+        "id": "F1",
+        "value": "2.4%",
+        "what_it_measures": "Share of treated municipal wastewater that was reused in 2025",
+        "verbatim_quote": "Across the 14 countries surveyed, only 2.4% of treated municipal wastewater was reused in 2025, while 61% of utilities reported at least one drought-related supply restriction in the past five years.",
+        "page": 1,
+        "why_it_matters": "We clean the water, then throw it away"
+      },
+      {
+        "id": "F2",
+        "value": "61%",
+        "what_it_measures": "Utilities with a drought-related supply restriction in the last 5 years",
+        "verbatim_quote": "Across the 14 countries surveyed, only 2.4% of treated municipal wastewater was reused in 2025, while 61% of utilities reported at least one drought-related supply restriction in the past five years.",
+        "page": 1,
+        "why_it_matters": "Scarcity is already mainstream, not a future risk"
+      },
+      {
+        "id": "F3",
+        "value": "€0.38 per cubic metre",
+        "what_it_measures": "Median cost of reclaimed water for irrigation, vs €0.92 for desalination",
+        "verbatim_quote": "In the surveyed plants, the median cost of producing water fit for irrigation reuse was €0.38 per cubic metre, compared with €0.92 per cubic metre for seawater desalination.",
+        "page": 1,
+        "why_it_matters": "Reuse is less than half the cost of the usual alternative"
+      },
+      {
+        "id": "F4",
+        "value": "47%",
+        "what_it_measures": "Own electricity covered by plants with digestion + CHP",
+        "verbatim_quote": "Plants that installed anaerobic digestion with combined heat and power covered on average 47% of their own electricity demand.",
+        "page": 1,
+        "why_it_matters": "Treatment plants can be energy producers"
+      },
+      {
+        "id": "F5",
+        "value": "72%",
+        "what_it_measures": "Utility managers naming permitting/quality rules as the top barrier",
+        "verbatim_quote": "72% of utility managers named permitting and unclear quality rules as the biggest barrier to reuse, ahead of financing (41%) and public acceptance (23%).",
+        "page": 1,
+        "why_it_matters": "The bottleneck is regulatory, not technical"
+      },
+      {
+        "id": "F6",
+        "value": "1.1 billion cubic metres",
+        "what_it_measures": "Extra water per year if all reached the leading country's reuse share",
+        "verbatim_quote": "If the reuse share reached the level already achieved by the leading country in the survey, an additional 1.1 billion cubic metres of water per year would be available for agriculture and industry.",
+        "page": 1,
+        "why_it_matters": "The size of the prize"
+      }
+    ]
+  },
+  "checks": {
+    "F1": {
+      "status": "verified",
+      "page_found": 1,
+      "page_claimed": 1
+    },
+    "F2": {
+      "status": "verified",
+      "page_found": 1,
+      "page_claimed": 1
+    },
+    "F3": {
+      "status": "verified",
+      "page_found": 1,
+      "page_claimed": 1
+    },
+    "F4": {
+      "status": "verified",
+      "page_found": 1,
+      "page_claimed": 1
+    },
+    "F5": {
+      "status": "verified",
+      "page_found": 1,
+      "page_claimed": 1
+    },
+    "F6": {
+      "status": "verified",
+      "page_found": 1,
+      "page_claimed": 1
+    }
+  },
+  "drafts": {
+    "voice_profile": [
+      "Opens with a single blunt sentence, no greeting",
+      "Short paragraphs of 1-2 lines with white space between",
+      "Uses plain numbers, avoids jargon unless defined",
+      "Speaks from operator experience ('I've walked plants where...')",
+      "Ends with a direct question to practitioners",
+      "2-3 hashtags, no emojis"
+    ],
+    "posts": [
+      {
+        "figure_id": "F1",
+        "angle": "contrarian",
+        "hook": "We spend billions cleaning wastewater.\nThen we pour 97.6% of it away.",
+        "body": "The Water Reuse Outlook 2026 surveyed 14 countries.\n\nOnly 2.4% of treated municipal wastewater was reused in 2025.\n\nThat water has already been paid for. The pipes, the energy, the people running the plant. The hard part is done.\n\nAnd then it goes into the river.\n\nWe talk about water scarcity as if the answer is a new source. Often the source is already sitting at the outlet of our own treatment plants.\n\nReuse is not a futuristic idea. It's the cheapest litre we're not using.",
+        "closing_question": "If you run a plant: what would it take for your effluent to have a second customer?",
+        "hashtags": [
+          "WaterReuse",
+          "Wastewater",
+          "CircularWater"
+        ]
+      },
+      {
+        "figure_id": "F3",
+        "angle": "practical",
+        "hook": "€0.38 vs €0.92.\nThat's the whole business case for water reuse in one line.",
+        "body": "From the Water Reuse Outlook 2026:\n\nThe median cost of producing water fit for irrigation reuse was €0.38 per cubic metre.\n\nSeawater desalination: €0.92 per cubic metre.\n\nSo if you're a region looking at a desal plant, three questions first:\n\n1. How much treated effluent do you already discharge within 20 km of farmland?\n2. What extra treatment step gets it to irrigation quality?\n3. Who owns the pipe in between?\n\nOften the answer is cheaper, faster and already half built.",
+        "closing_question": "Which of those three questions is the hardest one where you work?",
+        "hashtags": [
+          "WaterReuse",
+          "Desalination",
+          "Agriculture"
+        ]
+      },
+      {
+        "figure_id": "F5",
+        "angle": "story",
+        "hook": "I used to think the barrier to water reuse was technology.\nThe operators told me otherwise.",
+        "body": "In the Water Reuse Outlook 2026, 72% of utility managers named permitting and unclear quality rules as the biggest barrier to reuse.\n\nFinancing came second at 41%. Public acceptance, the one we spend the most time worrying about, was 23%.\n\nThe membranes work. The UV works. The engineers know how to do this.\n\nWhat's missing is a clear answer to a simple question: \"What quality do you need, and who signs off?\"\n\nUntil that's written down, every reuse project starts from zero.",
+        "closing_question": "What's the one rule you'd rewrite to unlock reuse in your country?",
+        "hashtags": [
+          "WaterPolicy",
+          "WaterReuse",
+          "Utilities"
+        ]
+      }
+    ],
+    "article": {
+      "title": "The cheapest new water source is already flowing out of our plants",
+      "subtitle": "Three numbers from the Water Reuse Outlook 2026 and what they mean for utilities",
+      "figure_ids": [
+        "F1",
+        "F3",
+        "F6"
+      ],
+      "body_markdown": "Every water conversation eventually lands on the same question: where will the next litre come from?\n\nNew reservoirs take decades. Desalination is energy hungry. Groundwater is already overdrawn in many basins. But one source is sitting in plain sight, already treated, already paid for, flowing out of every municipal wastewater plant.\n\n## We clean it, then we waste it\n\nThe Water Reuse Outlook 2026 surveyed 14 countries. Only 2.4% of treated municipal wastewater was reused in 2025.\n\nThink about what that means operationally. The collection network, the aeration, the sludge handling, the lab work: all of it is done. The water leaving the plant has a value. We just haven't given it a buyer.\n\n## It is not expensive\n\nThe usual objection is cost. The data says otherwise. The median cost of producing water fit for irrigation reuse was €0.38 per cubic metre, compared with €0.92 per cubic metre for seawater desalination.\n\nThat gap matters most in exactly the places under the most pressure: coastal regions with farming inland, where desal is often the default proposal.\n\n## The prize is large\n\nIf every country in the survey reached the reuse share already achieved by the leader, an additional 1.1 billion cubic metres of water per year would be available for agriculture and industry.\n\nThat's not a technology forecast. It's what happens if the rest catch up with someone who has already done it.\n\n## So what's stopping us?\n\nIn my conversations with operators the answer is rarely the treatment train. It's the paperwork: who defines the quality class, who is liable, who signs off. Fix that, and the cheapest new water source in Europe is ready to go.\n\nIf you work at a utility, a regulator or a farm cooperative, I'd love to hear what reuse looks like where you are."
+    }
+  },
+  "unsupported": {
+    "posts": [
+      [
+        "97.6"
+      ],
+      [
+        "20"
+      ],
+      []
+    ],
+    "article": []
+  }
+}
