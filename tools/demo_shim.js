@@ -7,6 +7,70 @@ const nowIso = () => new Date().toISOString();
 function tick() { for (const p of S.posts) if (p.status === "scheduled" && p.scheduled_at <= nowIso()) Object.assign(p, {status: "posted", posted_at: nowIso(), test_mode: 1}); }
 function order() { const r = {scheduled: 0, draft: 1, failed: 2}; return [...S.posts].sort((a, b) => (r[a.status] ?? 3) - (r[b.status] ?? 3) || (b.scheduled_at || b.posted_at || b.created_at).localeCompare(a.scheduled_at || a.posted_at || a.created_at)); }
 function sugg() { return {items: S.items.filter(i => ["relevant", "drafted"].includes(i.verdict)), last_run: S.last}; }
+// ---------- real drafting with the viewer's Claude (same prompt and layout as article.py) ----------
+let samplePromise = null;
+const getSample = () => (samplePromise ??= (window.claude?.use ? window.claude.use("sample") : Promise.resolve(null)));
+function assemble(p, url) {   // her layout, as article.assemble()
+  const t = x => (x || "").trim();
+  const bullets = (p.key_messages || []).map(m => "• " + String(m).replace(/^[•\-– ]+/, "").trim()).filter(b => b.length > 2).join("\n");
+  const opening = [p.hook, p.source_intro, bullets, p.interpretation].map(t).filter(Boolean).join("\n");
+  const source = [t(p.source_label), t(url)].filter(Boolean).join("\n");
+  return [opening, p.punchline, p.closing, source].map(t).filter(Boolean).join("\n\n");
+}
+function enforce(text) {      // as style.enforce()
+  const fixes = [];
+  if (/(^|[^\w&])#[\wÀ-ž]+/.test(text)) { text = text.replace(/(^|[^\w&])#[\wÀ-ž]+/g, "$1"); fixes.push("Removed hashtags (you don't use them)."); }
+  if (/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(text)) { text = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F]/gu, ""); fixes.push("Removed emojis (you don't use them)."); }
+  return [text.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim(), fixes];
+}
+function unsupported(article, text) {   // numbers in the draft that never appear in the article
+  const nums = s => s.match(/\d+(?:[.,]\d+)?/g) || [];
+  const have = new Set(nums(article)), bad = [];
+  for (const n of nums(text)) if (!have.has(n) && !bad.includes(n) && !/^(19|20)\d\d$/.test(n) && !(/^\d+$/.test(n) && +n <= 10)) bad.push(n);
+  return bad;
+}
+async function realDraft(body) {
+  const text = (body.text || "").trim(), url = (body.url || "").trim();
+  if (text.length < 300) return J({error: url
+    ? "This browser demo can't open links. Copy the article text from the page and paste it into the Article text box, then click Draft again. (The app on your computer opens links by itself.)"
+    : "Paste a link and the article text."}, 400);
+  const sample = await getSample();
+  if (!sample) return J({error: "Claude isn't available in this view. Open the demo on claude.ai while signed in."}, 400);
+  const samples = DEMO.voice.posts.map(p => `<sample>\n${p.text.trim()}\n</sample>`).join("\n\n");
+  const prompt = `${DEMO.article_system}
+
+Reply with ONLY a JSON object with exactly these string fields (key_messages is an array of strings):
+${JSON.stringify(DEMO.fields, null, 1)}
+
+<article url="${url}">
+${text.slice(0, 60000)}
+</article>
+
+<author_samples>
+${samples}
+</author_samples>
+
+<author_style_notes>
+${DEMO.voice.style_notes}
+</author_style_notes>
+
+Output language: ${DEMO.languages[body.language] || "English"}.
+Write the post.`;
+  try {
+    const p = await sample.json(prompt, {modelTier: "default"});
+    if (!p || !p.hook || !Array.isArray(p.key_messages)) throw {code: "invalid_json"};
+    const [full, fixes] = enforce(assemble(p, url));
+    return J({post: p, text: full, source_url: url, source_title: p.source_title || "",
+      unsupported: unsupported(text, url ? full.split(url).join("") : full), style: [...styleCheck(full, url), ...fixes]});
+  } catch (e) {
+    const msg = {not_granted: "You didn't allow this page to use Claude, so it can't write drafts in this view.",
+      rate_limited: "Claude is busy or you've hit a usage limit. Try again in a minute.",
+      sampling_disabled: "Claude isn't available for this account.", session_expired: "Sign in to claude.ai again, then retry.",
+      invalid_json: "Claude's answer came back in the wrong shape. Click Draft again.",
+      refused: "Claude declined this text. Try a different article."}[e && e.code] || "Couldn't draft this time. Click Draft again.";
+    return J({error: msg}, 400);
+  }
+}
 function demoDraft(url) { const d = JSON.parse(JSON.stringify(DEMO.draft)); if (url) { d.text = d.text.replace(d.source_url, url); d.source_url = url; } return d; }
 function styleCheck(text, url) {   // same rules as style.py
   const out = [], body = url ? text.split(url).join("") : text;
@@ -28,10 +92,10 @@ function styleCheck(text, url) {   // same rules as style.py
 }
 window.fetch = async (url, opt = {}) => {
   const m = (opt.method || "GET").toUpperCase(), body = opt.body ? JSON.parse(opt.body) : {};
-  await new Promise(r => setTimeout(r, url.includes("article") || url.includes("watch/draft") ? 900 : 120));
+  await new Promise(r => setTimeout(r, url.includes("watch/draft") ? 600 : 80));
   tick();
   if (url === "/api/status") return J({demo: true, voice: DEMO.voice});
-  if (url === "/api/article") return J(demoDraft(body.url));
+  if (url === "/api/article") return realDraft(body);
   if (url === "/api/style") return J({issues: styleCheck(body.text || "", body.url || "")});
   if (url === "/api/queue" && m === "GET") return J({posts: order(), linkedin: {connected: false, configured: false, test_mode: true}});
   if (url === "/api/queue" && m === "POST") {
@@ -53,6 +117,7 @@ window.fetch = async (url, opt = {}) => {
   if (url === "/api/watch/run") { S.last = {at: nowIso(), found: 0, relevant: 0, drafted: 0, note: "demo"}; return J({found: 0, relevant: 0, drafted: 0, note: "Demo: the live news check runs in the app on your computer."}); }
   if (url === "/api/watch/dismiss") { const it = S.items.find(i => i.url === body.url); if (it) it.verdict = "dismissed"; return J(sugg()); }
   if (url === "/api/watch/draft") {
+    return J({error: "In this demo: open the article, copy its text, then use the boxes on the left."}, 400);
     const it = S.items.find(i => i.url === body.url); const d = demoDraft(body.url);
     const p = {id: S.nextId++, created_at: nowIso(), text: d.text, source_url: body.url, source_title: it?.title || "", status: "draft",
       scheduled_at: null, posted_at: null, post_urn: null, test_mode: 0, error: null, note: "Found by the watcher. Review before scheduling. (Demo: sample text, not this article.)"};

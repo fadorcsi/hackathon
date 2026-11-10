@@ -22,8 +22,10 @@ page = (ROOT / "static/post.html").read_text(encoding="utf-8")
 pstyle = page[page.index("<style>") + 7:page.index("</style>")]
 body = page[page.index("<body>") + 6:page.index("<script>")]
 script = page[page.index("<script>") + 8:page.rindex("</script>")]
+body = body.replace('<details style="margin-top:8px"><summary>Paywalled or won\'t load? Paste the text instead</summary>',
+                    '<details open style="margin-top:8px"><summary>Article text (needed in this demo: the browser can\'t open links)</summary>')
 body = re.sub(r"<nav>.*?</nav>", '<div class="demo-bar"><b>Demo</b> · runs in your browser with sample data. '
-              'Drafts are examples; nothing is posted. The real app runs on your computer (start.bat).</div>', body, flags=re.S)
+              'Paste the article text and Claude writes a real draft in your style, using your Claude account. Nothing is posted. The full app (opens links itself, watches the news, posts to LinkedIn) runs on your computer.</div>', body, flags=re.S)
 
 demo = article.demo_post("")
 now = dt.datetime.now(dt.timezone.utc)
@@ -43,7 +45,8 @@ items = [
      "reason": "Example suggestion: trusted source, practical guide on water retention and demand.",
      "verdict": "relevant", "error": None},
 ]
-data = {"seed": seed, "cfg": watcher.load_config(), "items": items, "voice": drafter.default_voice(), "draft": demo}
+fields = {k: v.description for k, v in article.ArticlePost.model_fields.items()}
+data = {"article_system": article.ARTICLE_SYSTEM, "fields": fields, "languages": drafter.LANGUAGES, "seed": seed, "cfg": watcher.load_config(), "items": items, "voice": drafter.default_voice(), "draft": demo}
 
 shim = (ROOT / "tools/demo_shim.js").read_text(encoding="utf-8").replace("__DATA__", json.dumps(data, ensure_ascii=False))
 html = f"""<title>Research to Posts</title>
